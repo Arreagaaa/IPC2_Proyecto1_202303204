@@ -17,6 +17,21 @@ class ListaEnlazada:
             actual.siguiente = nodo
         self.longitud += 1
 
+    def insertar(self, dato):
+        return self.agregar(dato)
+
+    def tamanio(self):
+        return self.longitud
+
+    def establecer(self, indice, dato):
+        if indice < 0 or indice >= self.longitud:
+            return False
+        actual = self.primero
+        for i in range(indice):
+            actual = actual.siguiente
+        actual.dato = dato
+        return True
+
     def obtener(self, indice):
         if indice < 0 or indice >= self.longitud:
             return None

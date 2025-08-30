@@ -99,7 +99,7 @@
 			</sensorT>
 			<sensorT id="t02" nombre="Sensor T02">
 				<frecuencia idEstacion="e03">1400</frecuencia>
-				<frecuencia idEstacion="e04">900</freuencia>
+				<frecuencia idEstacion="e04">900</frecuencia>
 			</sensorT>
 		</sensoresCultivo>
 	</campo>
@@ -167,7 +167,7 @@
 				<frecuencia idEstacion="e02">600</frecuencia>
 			</sensorS>
 			<sensorS id="s03" nombre="Sensor S03">
-				<frecuencia idEstacion="e03">1300</freuencia>
+				<frecuencia idEstacion="e03">1300</frecuencia>
 				<frecuencia idEstacion="e04">800</frecuencia>
 			</sensorS>
 			<sensorS id="s04" nombre="Sensor S04">

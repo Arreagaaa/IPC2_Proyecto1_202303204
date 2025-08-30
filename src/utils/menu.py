@@ -6,7 +6,8 @@ from tkinter import filedialog
 def elegir_archivo_dialogo():
     root = tk.Tk()
     root.withdraw()
-    archivo = filedialog.askopenfilename(filetypes=[('XML files', '*.xml'), ('All files', '*.*')])
+    archivo = filedialog.askopenfilename(
+        filetypes=[('XML files', '*.xml'), ('All files', '*.*')])
     root.destroy()
     return archivo
 
@@ -14,7 +15,8 @@ def elegir_archivo_dialogo():
 def guardar_archivo_dialogo():
     root = tk.Tk()
     root.withdraw()
-    archivo = filedialog.asksaveasfilename(defaultextension='.xml', filetypes=[('XML files', '*.xml'), ('All files', '*.*')])
+    archivo = filedialog.asksaveasfilename(defaultextension='.xml', filetypes=[
+                                           ('XML files', '*.xml'), ('All files', '*.*')])
     root.destroy()
     return archivo
 
@@ -65,9 +67,17 @@ def main():
         elif opcion == "5":
             sistema.listar_campos()
             id_campo = input("Ingrese el ID del campo a graficar: ")
-            print("Tipos disponibles: suelo, cultivo, patron")
+            print("Tipos disponibles:")
+            print("- suelo (matriz frecuencia F[n,s])")
+            print("- cultivo (matriz frecuencia F[n,t])")
+            print("- patron (matriz patrones Fp[n,s])")
+            print("- reducida_suelo (matriz reducida Fr[n,s])")
+            print("- reducida_cultivo (matriz reducida Fr[n,t])")
             tipo = input("Ingrese tipo de matriz a graficar: ")
-            sistema.generar_grafica_campo(id_campo, tipo=tipo)
+            resultado = sistema.generar_grafica_campo(id_campo, tipo=tipo)
+            if resultado:
+                print(f"Gráfica generada exitosamente!")
+                print("Para generar PNG ejecutar: dot -Tpng archivo.dot -o archivo.png")
 
         elif opcion == "6":
             print("\nMostrar matrices:")

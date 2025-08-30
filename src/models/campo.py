@@ -106,34 +106,55 @@ class CampoAgricola:
             self.matriz_patron_cultivo = patron
 
     def reducir_patrones(self):
-        def reducir(m_patron, headers_fila):
-            grupos = {}
-            filas = []
+        def reducir(m_patron, headers_fila, matriz_original):
+            grupos_idx = {}
+            filas_keys = []
             for i in range(m_patron.num_filas):
                 row = [str(m_patron.obtener(i, j).valor) if m_patron.obtener(
                     i, j) else "0" for j in range(m_patron.num_columnas)]
                 key = ",".join(row)
-                if key in grupos:
-                    grupos[key].append(headers_fila.obtener(i).id)
+                if key in grupos_idx:
+                    grupos_idx[key].append(i)
                 else:
-                    grupos[key] = [headers_fila.obtener(i).id]
-                    filas.append(row)
-            m_red = Matriz(len(filas), m_patron.num_columnas)
-            for i, row in enumerate(filas):
-                for j, val in enumerate(row):
-                    src = m_patron.obtener(0, j)
+                    grupos_idx[key] = [i]
+                    filas_keys.append(key)
+
+            m_red = Matriz(len(filas_keys), m_patron.num_columnas)
+            grupos_nombres = {}
+            for r_idx, key in enumerate(filas_keys):
+                fila_indices = grupos_idx[key]
+                nombres = []
+                for j in range(m_patron.num_columnas):
+                    suma = 0
+                    any_val = False
+                    for orig_row in fila_indices:
+                        cell = matriz_original.obtener(orig_row, j)
+                        if cell and str(cell.valor).strip() not in ["", "0"]:
+                            try:
+                                suma += float(cell.valor)
+                                any_val = True
+                            except Exception:
+                                pass
+                    src = matriz_original.obtener(0, j)
                     freq_cls = type(src) if src else None
                     if freq_cls:
-                        m_red.establecer(i, j, freq_cls("", val))
-            return m_red, grupos
+                        val_str = str(int(suma)) if any_val else "0"
+                        m_red.establecer(r_idx, j, freq_cls("", val_str))
+                nombres = [headers_fila.obtener(
+                    idx).nombre for idx in fila_indices]
+                grupos_nombres[key] = {
+                    'indices': fila_indices, 'nombres': nombres}
+
+            return m_red, grupos_nombres
 
         if hasattr(self, 'matriz_patron_suelo') and self.matriz_patron_suelo:
-            m_red, grupos = reducir(self.matriz_patron_suelo, self.estaciones)
+            m_red, grupos = reducir(
+                self.matriz_patron_suelo, self.estaciones, self.matriz_suelo)
             self.matriz_reducida_suelo = m_red
             self.grupos_suelo = grupos
 
         if hasattr(self, 'matriz_patron_cultivo') and self.matriz_patron_cultivo:
             m_red, grupos = reducir(
-                self.matriz_patron_cultivo, self.estaciones)
+                self.matriz_patron_cultivo, self.estaciones, self.matriz_cultivo)
             self.matriz_reducida_cultivo = m_red
             self.grupos_cultivo = grupos

@@ -5,4 +5,4 @@ class Sensor:
     def __init__(self, id_sensor, nombre):
         self.id = id_sensor
         self.nombre = nombre
-        self.frecuencia = ListaEnlazada()
+        self.frecuencias = ListaEnlazada()
