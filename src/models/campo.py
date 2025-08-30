@@ -3,8 +3,8 @@ from matriz import Matriz
 
 
 class CampoAgricola:
-    def __init__(self, id, nombre):
-        self.id = id
+    def __init__(self, id_campo, nombre):
+        self.id_campo = id_campo
         self.nombre = nombre
         self.estaciones = ListaEnlazada()
         self.sensores_suelo = ListaEnlazada()
@@ -56,3 +56,22 @@ class CampoAgricola:
             titulo_cultivo = f"Matriz de Cultivo - Campo {self.id}"
             self.matriz_cultivo.mostrar(
                 titulo_cultivo, self.estaciones, self.sensores_cultivo)
+
+    def visualizar_matrices_graphviz(self):
+        if self.matriz_suelo:
+            print("Estoy generando visualización de matriz de suelo...")
+            self.matriz_suelo.generar_graphviz(
+                f"Matriz Suelo - Campo {self.id}",
+                self.estaciones,
+                self.sensores_suelo,
+                f"matriz_suelo_campo_{self.id}"
+            )
+
+        if self.matriz_cultivo:
+            print("Estoy generando visualización de matriz de cultivo...")
+            self.matriz_cultivo.generar_graphviz(
+                f"Matriz Cultivo - Campo {self.id}",
+                self.estaciones,
+                self.sensores_cultivo,
+                f"matriz_cultivo_campo_{self.id}"
+            )
