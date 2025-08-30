@@ -28,7 +28,7 @@ def main():
         print("---------------------------------------")
         print("| SISTEMA DE AGRICULTURA DE PRECISION |")
         print("---------------------------------------")
-        print("|1. Cargar archivo (seleccionar archivo)|")
+        print("|1. Cargar archivo                     |")
         print("|2. Procesar archivo                   |")
         print("|3. Escribir archivo de salida         |")
         print("|4. Mostrar datos del estudiante       |")
@@ -67,20 +67,46 @@ def main():
         elif opcion == "5":
             sistema.listar_campos()
             id_campo = input("Ingrese el ID del campo a graficar: ")
-            print("Tipos disponibles:")
-            print("- suelo (matriz frecuencia F[n,s])")
-            print("- cultivo (matriz frecuencia F[n,t])")
-            print("- patron (matriz patrones Fp[n,s])")
-            print("- reducida_suelo (matriz reducida Fr[n,s])")
-            print("- reducida_cultivo (matriz reducida Fr[n,t])")
-            tipo = input("Ingrese tipo de matriz a graficar: ")
-            resultado = sistema.generar_grafica_campo(id_campo, tipo=tipo)
-            if resultado:
-                print(f"Gráfica generada exitosamente!")
-                print("Para generar PNG ejecutar: dot -Tpng archivo.dot -o archivo.png")
+
+            print("\n" + "="*50)
+            print("       SELECCIONAR TIPO DE MATRIZ")
+            print("="*50)
+            print("| 1. Suelo (matriz frecuencia F[n,s])      |")
+            print("| 2. Cultivo (matriz frecuencia F[n,t])    |")
+            print("| 3. Patrón (matriz patrones Fp[n,s])      |")
+            print("| 4. Reducida Suelo (matriz Fr[n,s])       |")
+            print("| 5. Reducida Cultivo (matriz Fr[n,t])     |")
+            print("="*50)
+
+            tipo_opcion = input("Seleccione el tipo de matriz (1-5): ")
+
+            tipos_matriz = {
+                "1": "suelo",
+                "2": "cultivo",
+                "3": "patron",
+                "4": "reducida_suelo",
+                "5": "reducida_cultivo"
+            }
+
+            if tipo_opcion in tipos_matriz:
+                tipo = tipos_matriz[tipo_opcion]
+                print(
+                    f"\n Generando gráfica tipo '{tipo}' para campo {id_campo}...")
+                resultado = sistema.generar_grafica_campo(id_campo, tipo=tipo)
+                if resultado:
+                    print(f"¡Gráfica generada exitosamente!")
+                    print(f"Archivo: {resultado}")
+                    print(
+                        "Para generar PNG ejecutar: dot -Tpng archivo.dot -o archivo.png")
+                else:
+                    print("Error al generar la gráfica")
+            else:
+                print("Opción no válida. Debe seleccionar un número del 1 al 5.")
 
         elif opcion == "6":
-            print("\nMostrar matrices:")
+            print("\n" + "="*50)
+            print("         MOSTRAR MATRICES DE CAMPO")
+            print("="*50)
             sistema.listar_campos()
             id_campo = input("Ingrese el ID del campo: ")
             sistema.mostrar_campos(id_campo)

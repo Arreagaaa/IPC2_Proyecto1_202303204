@@ -45,50 +45,81 @@ class Matriz:
             print("\t".join(row_vals))
 
     def generar_graphviz_tabla(self, titulo, headers_fila, headers_columna, nombre_archivo="matriz_tabla"):
-        import graphviz
-
         def esc(s):
-            return str(s).replace('"', '\\"')
+            return str(s).replace('"', '\\"').replace('<', '&lt;').replace('>', '&gt;')
 
-        th_cols = '<td border="1" bgcolor="#f5f7fa"></td>'
+        encabezados_col = ""
         for j in range(self.num_columnas):
             sensor = headers_columna.obtener(j)
-            th_cols += f'<td border="1" bgcolor="#f5f7fa"><b>{esc(sensor.id if sensor else "")}</b></td>'
+            sensor_id = esc(sensor.id if sensor else f"S{j+1}")
+            encabezados_col += f'<td bgcolor="#4CAF50"><font color="white"><b>{sensor_id}</b></font></td>'
 
-        filas_html = ""
+        filas_datos = ""
         for i in range(self.num_filas):
             estacion = headers_fila.obtener(i)
-            filas_html += f'<tr><td border="1" bgcolor="#f5f7fa"><b>{esc(estacion.id if estacion else "")}</b></td>'
+            estacion_id = esc(estacion.id if estacion else f"E{i+1}")
+
+            filas_datos += f'<tr><td bgcolor="#2196F3"><font color="white"><b>{estacion_id}</b></font></td>'
+
             for j in range(self.num_columnas):
                 frecuencia = self.obtener(i, j)
-                valor = esc(frecuencia.valor if frecuencia else "0")
-                bg = "#ffffff" if valor == "0" else "#ffd6d6"
-                filas_html += f'<td border="1" bgcolor="{bg}">{valor}</td>'
-            filas_html += '</tr>'
+                valor = str(frecuencia.valor if frecuencia else "0")
 
-        tabla = f'''
-          <<table BORDER="0" CELLBORDER="0" CELLSPACING="0">
-          <tr><td>
-          <table BORDER="1" CELLBORDER="1" CELLSPACING="0">
-          <tr>{th_cols}</tr>
-              {filas_html}
-          </table>
-          </td></tr>
-          </table>>
-        '''
+                if valor == "0":
+                    color_fondo = "#FFEBEE"
+                else:
+                    val_num = int(valor) if valor.isdigit() else 0
+                    if val_num > 2000:
+                        color_fondo = "#C8E6C9"
+                    elif val_num > 1000:
+                        color_fondo = "#E8F5E8"
+                    else:
+                        color_fondo = "#F3E5F5"
 
-        dot = graphviz.Digraph(comment=str(titulo))
-        dot.attr(rankdir='LR')
-        dot.node('matriz_tabla', label=tabla, shape='plain')
+                filas_datos += f'<td bgcolor="{color_fondo}"><b>{valor}</b></td>'
+            filas_datos += '</tr>'
 
-        dot.node('titulo', label=str(titulo), shape='box',
-                 style='filled', fillcolor='lightgreen')
-        dot.edge('titulo', 'matriz_tabla', style='invis')
+        tabla_html = f'''<
+        <table border="2" cellspacing="0" cellpadding="6">
+            <tr>
+                <td bgcolor="#FF9800"><font color="white"><b>Est\\Sens</b></font></td>
+                {encabezados_col}
+            </tr>
+            {filas_datos}
+        </table>
+        >'''
+
+        contenido_dot = f'''// {titulo}
+digraph matriz {{
+    rankdir=TB;
+    node [shape=plaintext];
+    graph [bgcolor=white];
+    
+    // Título con mejor formato
+    titulo [label="{esc(titulo)}" 
+            shape=box
+            style=filled 
+            fillcolor="#E3F2FD"
+            fontsize=14 
+            fontweight=bold
+            color="#1976D2"];
+    
+    // Matriz con tabla HTML
+    matriz [label={tabla_html}];
+    
+    // Layout
+    titulo -> matriz [style=invis weight=10];
+    
+    // Configuración global
+    graph [splines=false, pad=0.5];
+}}'''
 
         with open(f'{nombre_archivo}.dot', 'w', encoding='utf-8') as f:
-            f.write(dot.source)
+            f.write(contenido_dot)
 
-        print(f"Archivo DOT generado: {nombre_archivo}.dot")
+        print(f"✅ Archivo DOT generado: {nombre_archivo}.dot")
         print(
-            f"Para generar PNG: dot -Tpng {nombre_archivo}.dot -o {nombre_archivo}.png")
-        return dot.source
+            f"🖼️  Para generar PNG: dot -Tpng {nombre_archivo}.dot -o {nombre_archivo}.png")
+        print(
+            f"📊 Matriz {self.num_filas}x{self.num_columnas} creada exitosamente")
+        return contenido_dot
