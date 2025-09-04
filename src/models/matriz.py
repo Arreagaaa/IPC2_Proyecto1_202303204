@@ -30,19 +30,36 @@ class Matriz:
         print(f"\n{titulo}")
         print("-" * 61)
 
-        header_row = ["Estacion\\Sensor"]
+        # Crear encabezado usando lista enlazada
+        header_row = ListaEnlazada()
+        header_row.insertar("Estacion\\Sensor")
         for j in range(self.num_columnas):
             sensor = headers_columna.obtener(j)
-            header_row.append(str(sensor.id if sensor else ""))
-        print("\t".join(header_row))
+            header_row.insertar(str(sensor.id if sensor else ""))
+
+        # Mostrar encabezado
+        encabezado = ""
+        for i in range(header_row.longitud):
+            encabezado += header_row.obtener(i)
+            if i < header_row.longitud - 1:
+                encabezado += "\t"
+        print(encabezado)
 
         for i in range(self.num_filas):
             estacion = headers_fila.obtener(i)
-            row_vals = [str(estacion.id if estacion else "")]
+            row_vals = ListaEnlazada()
+            row_vals.insertar(str(estacion.id if estacion else ""))
             for j in range(self.num_columnas):
                 frecuencia = self.obtener(i, j)
-                row_vals.append(str(frecuencia.valor if frecuencia else "0"))
-            print("\t".join(row_vals))
+                row_vals.insertar(str(frecuencia.valor if frecuencia else "0"))
+
+            # Mostrar fila
+            fila = ""
+            for k in range(row_vals.longitud):
+                fila += row_vals.obtener(k)
+                if k < row_vals.longitud - 1:
+                    fila += "\t"
+            print(fila)
 
     def generar_graphviz_tabla(self, titulo, headers_fila, headers_columna, nombre_archivo="matriz_tabla"):
         def esc(s):

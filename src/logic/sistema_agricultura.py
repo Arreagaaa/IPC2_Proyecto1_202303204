@@ -10,6 +10,28 @@ class SistemaAgricultura:
     def __init__(self):
         self.campos = ListaEnlazada()
 
+    def _buscar_en_grupo(self, grupos, clave_buscar, atributo):
+        """Función auxiliar para buscar en grupos usando listas enlazadas"""
+        for i in range(grupos.longitud):
+            grupo = grupos.obtener(i)
+            if grupo.clave == clave_buscar:
+                info_grupo = grupo.valor
+                for j in range(info_grupo.longitud):
+                    par_info = info_grupo.obtener(j)
+                    if par_info.clave == atributo:
+                        return par_info.valor
+                return ListaEnlazada()  # Retorna lista vacía si no encuentra
+        return ListaEnlazada()
+
+    def _lista_a_string_separado(self, lista_enlazada, separador):
+        """Convierte una ListaEnlazada a string separado por comas"""
+        resultado = ""
+        for i in range(lista_enlazada.longitud):
+            resultado += str(lista_enlazada.obtener(i))
+            if i < lista_enlazada.longitud - 1:
+                resultado += separador
+        return resultado
+
     def cargar_archivo(self, ruta_archivo):
         try:
             dom = parse(ruta_archivo)
@@ -123,17 +145,28 @@ class SistemaAgricultura:
 
             if grupos:
                 est_red = doc.createElement('estacionesBaseReducidas')
-                for key, info in grupos.items():
-                    nombres = info.get('nombres', [])
-                    indices = info.get('indices', [])
+
+                # Iterar sobre grupos usando listas enlazadas
+                for grupo_idx in range(grupos.longitud):
+                    grupo = grupos.obtener(grupo_idx)
+                    key = grupo.clave
+
+                    nombres = self._buscar_en_grupo(grupos, key, 'nombres')
+                    indices = self._buscar_en_grupo(grupos, key, 'indices')
+
                     rep_id = ''
-                    if indices:
-                        est_obj = campo.estaciones.obtener(indices[0])
+                    if indices.longitud > 0:
+                        primer_indice = indices.obtener(0)
+                        est_obj = campo.estaciones.obtener(primer_indice)
                         rep_id = est_obj.id if est_obj else ''
+
                     e = doc.createElement('estacion')
                     if rep_id:
                         e.setAttribute('id', rep_id)
-                    e.setAttribute('nombre', ', '.join(nombres))
+
+                    # Convertir nombres a string separado por comas
+                    nombres_str = self._lista_a_string_separado(nombres, ", ")
+                    e.setAttribute('nombre', nombres_str)
                     est_red.appendChild(e)
                 cnode.appendChild(est_red)
 
@@ -146,10 +179,21 @@ class SistemaAgricultura:
                         if sensor_obj:
                             s_node.setAttribute('id', sensor_obj.id)
                             s_node.setAttribute('nombre', sensor_obj.nombre)
-                        for row_idx, (key, info) in enumerate(grupos.items()):
-                            indices = info.get('indices', [])
-                            rep_id = campo.estaciones.obtener(
-                                indices[0]).id if indices else ''
+
+                        # Iterar sobre grupos
+                        for row_idx in range(grupos.longitud):
+                            grupo = grupos.obtener(row_idx)
+                            key = grupo.clave
+                            indices = self._buscar_en_grupo(
+                                grupos, key, 'indices')
+
+                            rep_id = ''
+                            if indices.longitud > 0:
+                                primer_indice = indices.obtener(0)
+                                est_rep = campo.estaciones.obtener(
+                                    primer_indice)
+                                rep_id = est_rep.id if est_rep else ''
+
                             val_cell = m.obtener(row_idx, j)
                             valor = None
                             if val_cell and hasattr(val_cell, 'valor'):
@@ -178,10 +222,21 @@ class SistemaAgricultura:
                         if sensor_obj:
                             s_node.setAttribute('id', sensor_obj.id)
                             s_node.setAttribute('nombre', sensor_obj.nombre)
-                        for row_idx, (key, info) in enumerate(grupos.items()):
-                            indices = info.get('indices', [])
-                            rep_id = campo.estaciones.obtener(
-                                indices[0]).id if indices else ''
+
+                        # Iterar sobre grupos
+                        for row_idx in range(grupos.longitud):
+                            grupo = grupos.obtener(row_idx)
+                            key = grupo.clave
+                            indices = self._buscar_en_grupo(
+                                grupos, key, 'indices')
+
+                            rep_id = ''
+                            if indices.longitud > 0:
+                                primer_indice = indices.obtener(0)
+                                est_rep = campo.estaciones.obtener(
+                                    primer_indice)
+                                rep_id = est_rep.id if est_rep else ''
+
                             val_cell = m.obtener(row_idx, j)
                             valor = None
                             if val_cell and hasattr(val_cell, 'valor'):

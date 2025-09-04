@@ -1,4 +1,5 @@
 from ..logic.sistema_agricultura import SistemaAgricultura
+from ..models.lista_enlazada import ListaEnlazada
 import tkinter as tk
 from tkinter import filedialog
 
@@ -61,7 +62,13 @@ def main():
         elif opcion == "4":
             datos = sistema.datos_estudiante()
             print("Datos del estudiante:")
+            # Convertir diccionario nativo a lista enlazada
+            lista_datos = ListaEnlazada()
             for k, v in datos.items():
+                lista_datos.insertar((k, v))
+            
+            for i in range(lista_datos.longitud):
+                k, v = lista_datos.obtener(i)
                 print(f"{k}: {v}")
 
         elif opcion == "5":

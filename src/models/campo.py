@@ -1,5 +1,6 @@
 from .lista_enlazada import ListaEnlazada
 from .matriz import Matriz
+from .par_clave_valor import ParClaveValor
 
 
 class CampoAgricola:
@@ -107,27 +108,66 @@ class CampoAgricola:
 
     def reducir_patrones(self):
         def reducir(m_patron, headers_fila, matriz_original):
-            grupos_idx = {}
-            filas_keys = []
-            for i in range(m_patron.num_filas):
-                row = [str(m_patron.obtener(i, j).valor) if m_patron.obtener(
-                    i, j) else "0" for j in range(m_patron.num_columnas)]
-                key = ",".join(row)
-                if key in grupos_idx:
-                    grupos_idx[key].append(i)
-                else:
-                    grupos_idx[key] = [i]
-                    filas_keys.append(key)
+            # Usar listas enlazadas en lugar de diccionarios nativos
+            grupos_idx = ListaEnlazada()  # Lista de ParClaveValor
+            filas_keys = ListaEnlazada()  # Lista de claves
 
-            m_red = Matriz(len(filas_keys), m_patron.num_columnas)
-            grupos_nombres = {}
-            for r_idx, key in enumerate(filas_keys):
-                fila_indices = grupos_idx[key]
-                nombres = []
+            for i in range(m_patron.num_filas):
+                # Crear la clave de la fila como string
+                elementos_fila = ListaEnlazada()
+                for j in range(m_patron.num_columnas):
+                    valor = m_patron.obtener(i, j)
+                    elementos_fila.insertar(str(valor.valor) if valor else "0")
+
+                # Crear clave concatenando con comas
+                key = ""
+                for k in range(elementos_fila.longitud):
+                    key += elementos_fila.obtener(k)
+                    if k < elementos_fila.longitud - 1:
+                        key += ","
+
+                # Buscar si la clave ya existe
+                encontrado = False
+                for g in range(grupos_idx.longitud):
+                    par = grupos_idx.obtener(g)
+                    if par.clave == key:
+                        # La clave existe, agregar índice a la lista de índices
+                        par.valor.insertar(i)
+                        encontrado = True
+                        break
+
+                if not encontrado:
+                    # Nueva clave, crear nueva lista de índices
+                    nueva_lista_indices = ListaEnlazada()
+                    nueva_lista_indices.insertar(i)
+                    nuevo_par = ParClaveValor(key, nueva_lista_indices)
+                    grupos_idx.insertar(nuevo_par)
+                    filas_keys.insertar(key)
+
+            # Crear matriz reducida
+            m_red = Matriz(filas_keys.longitud, m_patron.num_columnas)
+            grupos_nombres = ListaEnlazada()  # Lista de ParClaveValor para nombres
+
+            for r_idx in range(filas_keys.longitud):
+                key = filas_keys.obtener(r_idx)
+
+                # Buscar la lista de índices para esta clave
+                fila_indices = None
+                for g in range(grupos_idx.longitud):
+                    par = grupos_idx.obtener(g)
+                    if par.clave == key:
+                        fila_indices = par.valor
+                        break
+
+                if not fila_indices:
+                    continue
+
+                # Procesar cada columna
                 for j in range(m_patron.num_columnas):
                     suma = 0
                     any_val = False
-                    for orig_row in fila_indices:
+                    for idx_pos in range(fila_indices.longitud):
+                        orig_row = fila_indices.obtener(idx_pos)
                         cell = matriz_original.obtener(orig_row, j)
                         if cell and str(cell.valor).strip() not in ["", "0"]:
                             try:
@@ -135,15 +175,32 @@ class CampoAgricola:
                                 any_val = True
                             except Exception:
                                 pass
+
                     src = matriz_original.obtener(0, j)
                     freq_cls = type(src) if src else None
                     if freq_cls:
                         val_str = str(int(suma)) if any_val else "0"
                         m_red.establecer(r_idx, j, freq_cls("", val_str))
-                nombres = [headers_fila.obtener(
-                    idx).nombre for idx in fila_indices]
-                grupos_nombres[key] = {
-                    'indices': fila_indices, 'nombres': nombres}
+
+                # Recopilar nombres de estaciones
+                nombres = ListaEnlazada()
+                for idx_pos in range(fila_indices.longitud):
+                    orig_idx = fila_indices.obtener(idx_pos)
+                    estacion = headers_fila.obtener(orig_idx)
+                    if estacion:
+                        nombres.insertar(estacion.nombre)
+
+                # Crear información del grupo usando ParClaveValor
+                info_indices = ParClaveValor('indices', fila_indices)
+                info_nombres = ParClaveValor('nombres', nombres)
+
+                # Crear lista de información para este grupo
+                info_grupo = ListaEnlazada()
+                info_grupo.insertar(info_indices)
+                info_grupo.insertar(info_nombres)
+
+                grupo_completo = ParClaveValor(key, info_grupo)
+                grupos_nombres.insertar(grupo_completo)
 
             return m_red, grupos_nombres
 
