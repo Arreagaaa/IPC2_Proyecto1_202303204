@@ -117,9 +117,9 @@ digraph matriz {{
         with open(f'{nombre_archivo}.dot', 'w', encoding='utf-8') as f:
             f.write(contenido_dot)
 
-        print(f"✅ Archivo DOT generado: {nombre_archivo}.dot")
+        print(f"Archivo DOT generado: {nombre_archivo}.dot")
         print(
-            f"🖼️  Para generar PNG: dot -Tpng {nombre_archivo}.dot -o {nombre_archivo}.png")
+            f"Para generar PNG: dot -Tpng {nombre_archivo}.dot -o {nombre_archivo}.png")
         print(
-            f"📊 Matriz {self.num_filas}x{self.num_columnas} creada exitosamente")
+            f"Matriz {self.num_filas}x{self.num_columnas} creada exitosamente")
         return contenido_dot
